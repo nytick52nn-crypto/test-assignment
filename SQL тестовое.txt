@@ -1,0 +1,63 @@
+Задание 1. Общая выручка за 1 квартал 2024 года
+============================================================
+ 
+SELECT SUM(total_amount) AS revenue_q1_2024
+FROM orders
+WHERE order_date >= '2024-01-01'
+  AND order_date < '2024-04-01'
+
+
+Задание 2. Топ-5 стран по количеству заказов
+============================================================
+ 
+SELECT c.country,
+       COUNT(o.order_id) AS order_count
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+GROUP BY c.country
+ORDER BY order_count DESC
+LIMIT 5
+
+
+Задание 3. Средний чек для завершённых заказов
+============================================================
+ 
+SELECT ROUND(AVG(total_amount), 2) AS avg_completed_order
+FROM orders
+WHERE status = 'completed'
+
+
+Задание 4. Количество новых покупателей, зарегистрированных в прошлом году
+============================================================
+ 
+SELECT COUNT(*) AS new_customers_last_year
+FROM customers
+WHERE strftime('%Y', registration_date) = '2023'
+
+
+Задание 5. Сумма выручки за каждую неделю 2 квартала 2024 года
+============================================================
+ 
+SELECT strftime('%W', order_date)           AS week_number,
+       MIN(order_date)                       AS week_start,
+       ROUND(SUM(total_amount), 2)           AS weekly_revenue
+FROM orders
+WHERE order_date >= '2024-04-01'
+  AND order_date <  '2024-07-01'
+GROUP BY week_number
+ORDER BY week_number
+
+
+Задание 6. Процент покупателей, совершивших повторный заказ
+============================================================
+ 
+SELECT ROUND(
+    100.0 * COUNT(*) / (SELECT COUNT(DISTINCT customer_id) FROM orders),
+    2
+) AS repeat_customers_pct
+FROM (
+    SELECT customer_id
+    FROM orders
+    GROUP BY customer_id
+    HAVING COUNT(*) > 1
+)
